@@ -3,11 +3,17 @@
 
 #include <QObject>
 
+#include "window.h"
+
 class Core : public QObject
 {
     Q_OBJECT
+
+    Window * window;
 public:
     explicit Core(QObject *parent = nullptr);
+
+    void operator()();
 
 signals:
 
