@@ -19,20 +19,22 @@ public:
     explicit NetworkHandler(struct NetworkParams , QObject *parent = nullptr);
 
 public slots:
-    void init();
-    void start();
-    void stop();
-    void receive();
+    void init();                            //initialize socket
+    void start();                           //start receiving
+    void stop();                            //stop receiving
+    void receive();                         //receive datagramms
 
 signals:
-    void connectionStatus(int);
-    void badReceive();
+    void connectionStatus(int);             //connection init status
+    void badReceive();                      //error while receiving
+    void overrideBuffer();                  //override buffer (receive speed > handle speed)
+    void dataReceived();                    //data received and should be handle
 private:
     QUdpSocket * m_socket;                  //Socket
 
     struct NetworkParams m_np;              //Network Parametrs
 
-    bool m_firstReceive;
+    bool m_firstReceive;                    //maybe I need it
 };
 
 #endif // NETWORKHANDLER_H
