@@ -1,5 +1,7 @@
 #include "networkhandler.h"
 
+#include <QDebug>
+
 NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObject(parent), m_np(p)
 {
     m_firstReceive = false;
@@ -7,14 +9,19 @@ NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObjec
 
 void NetworkHandler::init()
 {
+    qDebug() << "Start Netweork Init" << endl;
+    m_np.initMutex.lock();
     if (!m_socket)
         m_socket = new QUdpSocket(this);
+
     QHostAddress addr(QHostAddress::AnyIPv4);
     if (m_socket->bind(addr, IP_PORT, QUdpSocket::ReuseAddressHint) == false) {
-        emit connectionStatus(0);
+        m_np.init = false;
     } else {
-        emit connectionStatus(1);
+        m_np.init = true;
     }
+    m_np.initMutex.unlock();
+    qDebug() << "Start Netweork Init" << endl;
 }
 
 void NetworkHandler::start()
