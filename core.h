@@ -38,9 +38,9 @@ private:
     QThread m_networkThread;                        //Network Handler's thread
     QThread m_dataHandlerThread;                    //Data Handler's thread
 
-    QMutex m_networkinit;                           //Mutex of network init
     QMutex m_bufferMutex;                           //Mutex of circle buffer
     QMutex m_overrideMutex;                         //Mutex of override buffer
+    QMutex m_networkInitMutex;                      //Mutex of network init
     QMutex m_receiveIndexMutex;                     //Mutex of received data index
     QMutex m_writtenIndexMutex;                     //Mutex of written data index
 

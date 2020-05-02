@@ -9,8 +9,8 @@
 struct NetworkParams {
     QMutex & initMutex;
     QMutex & bufferMutex;
-    QMutex & receiveIndexMutex;
     QMutex & overrideMutex;
+    QMutex & receiveIndexMutex;
 
     long long & totalBytes;             //Total bytes amount
 

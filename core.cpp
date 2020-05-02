@@ -26,7 +26,14 @@ void Core::operator()()
 void Core::init()
 {
     emit initNetwork();
-    m_networkThread.wait();
+    QThread::usleep(100);
+    m_networkInitMutex.lock();
+    if (m_networkInit) {
+        qDebug() << "Seems good" << endl;
+    } else {
+        qDebug() << "Not good" << endl;
+    }
+    m_networkInitMutex.unlock();
     qDebug() << "Core" << endl;
 }
 
@@ -36,14 +43,16 @@ void Core::createDataHandler() {
 
 void Core::createNetworkHandler() {
     m_network = new NetworkHandler({
+        m_networkInitMutex,
         m_bufferMutex,
-        m_receiveIndexMutex,
         m_overrideMutex,
+        m_receiveIndexMutex,
         m_totalBytes,
         m_buffer,
         m_receiveIndex,
-        m_override,
-        m_terminateReceiving});
+        m_networkInit,
+        m_terminateReceiving,
+        m_override});
 
     m_network->moveToThread(&m_networkThread);
 
@@ -81,6 +90,7 @@ void Core::reset()
 
     m_override = false;
     m_dataWritten = true;
+    m_networkInit = false;
     m_terminateReceiving = true;
 }
 
