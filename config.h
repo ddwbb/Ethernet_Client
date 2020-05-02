@@ -7,17 +7,20 @@
 #include <QMutex>
 
 struct NetworkParams {
+    QMutex & initMutex;
     QMutex & bufferMutex;
     QMutex & receiveIndexMutex;
     QMutex & overrideMutex;
 
-    long long & totalBytes;             //total bytes amount
+    long long & totalBytes;             //Total bytes amount
 
     char * buffer;                      //buffer
 
-    unsigned short & receiveIndex;      //index in buffer
-    bool & override;                    //override circle buffer
-    bool & term;                        //stop receiving flag
+    unsigned short & receiveIndex;      //Index in buffer
+
+    bool & init;                        //Is init?
+    bool & term;                        //Stop receiving flag
+    bool & override;                    //Override circle buffer
 };
 
 
