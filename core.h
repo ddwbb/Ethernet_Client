@@ -23,13 +23,14 @@ public:
     void operator()();
 signals:
     void initNetwork();
-    void startReceiving();
-    void stopReceiving();
+    void receivingStarted();
+    void receivingStoped();
 
 
 private:
     Q_OBJECT
     QTimer m_timer;                                 //Receive Timer
+    QTimer m_updateTimer;
 
     Window * m_window;                              //Gui
     NetworkHandler * m_network;                     //Network handler + receiver
@@ -44,7 +45,7 @@ private:
     QMutex m_receiveIndexMutex;                     //Mutex of received data index
     QMutex m_writtenIndexMutex;                     //Mutex of written data index
 
-    int timeInSec;                                  //Time to receive in sec
+    int m_timeInSec;                                  //Time to receive in sec
 
     char * m_buffer;                                //Circle buffer
     //std::vector<char[1440]> * m_buffer;
@@ -55,10 +56,11 @@ private:
     unsigned short m_receiveIndex;                  //Received data index in circle buffer
     unsigned short m_writtenIndex;                  //Handled data index in circle buffer
 
-    bool m_override;                                //Is buffer overriding?
+    bool m_overrided;                               //Is buffer overriding?
+    bool m_initialized;                             //Is initialized and ready to process
     bool m_dataWritten;                             //Is all data was written?
-    bool m_networkInit;                             //Is network initialized?
-    bool m_terminateReceiving;                      //Is receiving must be stop?
+    bool m_networkInitialized;                      //Is network initialized?
+    bool m_receivingTerminated;                     //Is receiving must be stop?
 
     void init();                                    //Initialize
     void createDataHandler();                       //Create and initialize slots and signals of Data Handler
@@ -66,6 +68,7 @@ private:
     void reset();                                   //Set default state
     void changeTime();                              //Change time (caused by timer)
     void startReceive();                            //Start receive data
+    void stopReceiving();
     void stopReceiveByTimer();                      //Receiving stoped by timer
     void stopReceiveByInterrupt();                  //Receiving stoped by interrupt
 
