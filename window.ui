@@ -283,7 +283,7 @@
               <property name="minimumSize">
                <size>
                 <width>120</width>
-                <height>0</height>
+                <height>26</height>
                </size>
               </property>
               <property name="font">
@@ -297,14 +297,23 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="networkInitState">
+             <widget class="Indicator" name="networkInitState">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>26</width>
+                <height>26</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -317,7 +326,7 @@
               <property name="minimumSize">
                <size>
                 <width>120</width>
-                <height>0</height>
+                <height>30</height>
                </size>
               </property>
               <property name="font">
@@ -331,14 +340,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="fileInitState">
+             <widget class="Indicator" name="fileInitState">
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -382,14 +391,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="networkReceivingState">
+             <widget class="Indicator" name="networkReceivingState">
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -416,14 +425,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="fileWritingState">
+             <widget class="Indicator" name="fileWritingState">
               <property name="font">
                <font>
                 <pointsize>10</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>TextLabel</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -465,6 +474,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Indicator</class>
+   <extends>QLabel</extends>
+   <header>indicator.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
