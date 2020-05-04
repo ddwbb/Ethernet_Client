@@ -4,12 +4,13 @@
 
 NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObject(parent), m_np(p)
 {
+    m_socket = nullptr;
     m_firstReceive = false;
 }
 
 void NetworkHandler::init()
 {
-    qDebug() << "Start Netweork Init" << endl;
+    qDebug() << "Start Network Init" << endl;
     m_np.initMutex.lock();
     if (!m_socket)
         m_socket = new QUdpSocket(this);
@@ -21,7 +22,7 @@ void NetworkHandler::init()
         m_np.init = true;
     }
     m_np.initMutex.unlock();
-    qDebug() << "Start Netweork Init" << endl;
+    qDebug() << "End Network Init" << endl;
 }
 
 void NetworkHandler::start()
