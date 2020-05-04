@@ -6,6 +6,8 @@ Window::Window(QWidget *parent)
     , ui(new Ui::Window)
 {
     ui->setupUi(this);
+
+    ui->networkInitState->setState(IndicatorState::Processing);
 }
 
 Window::~Window()
@@ -13,3 +15,13 @@ Window::~Window()
     delete ui;
 }
 
+
+void Window::on_startButton_clicked()
+{
+
+}
+
+void Window::on_stopButton_clicked()
+{
+
+}
