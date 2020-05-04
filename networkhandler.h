@@ -8,8 +8,8 @@
 
 #include "config.h"
 
-#define REMOTE_ADDR "192.168.0.1"
-#define REMOTE_PORT 49001
+#define REMOTE_ADDR "192.168.0.25"
+#define REMOTE_PORT 4900
 #define IP_PORT 49001
 
 class NetworkHandler : public QObject
