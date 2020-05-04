@@ -28,6 +28,8 @@ void NetworkHandler::init()
 void NetworkHandler::start()
 {
     connect(m_socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
+    QHostAddress remote(REMOTE_ADDR);
+    m_socket->writeDatagram("1", 1, remote, REMOTE_PORT);
 }
 
 void NetworkHandler::stop()
