@@ -1,92 +1,72 @@
 #include "networkhandler.h"
+
 #include <QDebug>
 
-NetworkHandler::NetworkHandler(NetworkHandlerParams p, QObject * parent) : QObject(parent), params (p)
+NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObject(parent), m_np(p)
 {
-    dataStartedWrite = false;
+    m_socket = nullptr;
+    m_firstReceive = false;
 }
 
-NetworkHandler::~NetworkHandler()
+void NetworkHandler::init()
 {
+    qDebug() << "Start Network Init" << endl;
+    m_np.initMutex.lock();
+    if (!m_socket)
+        m_socket = new QUdpSocket(this);
 
-}
-
-void NetworkHandler::initNetworkConnection()
-{
-    dataStartedWrite = false;
-    params.networkInitMutex.lock();
-    if (params.networkInitialized) {
-        params.networkInitMutex.unlock();
-        return;
-    }
-    socket = new QUdpSocket;
-    serverAddress.setAddress(REMOTE_IP_ADDR);
-    if (socket->bind(QHostAddress::Any, DEFAULT_IP_PORT, QAbstractSocket::ReuseAddressHint) == false) {
-        //this->thread()->exit(-1);
-        params.networkInitMutex.unlock();
-        return;
-    }
-
-    if (socket->isValid()) {
-        connect(socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
-        params.networkInitialized = true;
-        params.networkInitMutex.unlock();
-        return;
+    QHostAddress addr(QHostAddress::AnyIPv4);
+    if (m_socket->bind(addr, IP_PORT, QUdpSocket::ReuseAddressHint) == false) {
+        m_np.init = false;
     } else {
-        //this->thread()->exit(-1);
-        params.networkInitMutex.unlock();
-        return;
+        m_np.init = true;
     }
-}
-
-void NetworkHandler::receive()
-{
-    params.bufferMutex.lock();
-    int bytes = socket->readDatagram(&params.buffer[params.index * PACKET_SIZE], PACKET_SIZE);
-    params.bufferMutex.unlock();
-
-
-    if (!bytes) {
-    }
-
-    if (!params.totalBytes) {
-        emit dataReceived(QThread::InheritPriority);
-        dataStartedWrite = true;
-    }
-    params.indexMutex.lock();
-    params.index++;
-    params.indexMutex.unlock();
-
-    if (params.index == 65535) {
-        params.overwriteMutex.lock();
-        if (!params.overwrite)
-            params.overwrite = true;
-        else
-            emit dataOverwritten();
-        params.overwriteMutex.unlock();
-    }
-
-    params.totalBytes += bytes;
-    params.totalDatagrams++;
-}
-
-void NetworkHandler::stop()
-{
-    if (!dataStartedWrite)
-        emit dataReceived();
-    socket->close();
-    disconnect(socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
-    params.networkInitialized = false;
+    m_np.initMutex.unlock();
+    qDebug() << "End Network Init" << endl;
 }
 
 void NetworkHandler::start()
 {
-    serverAddress.setAddress(REMOTE_IP_ADDR);
-    if (socket->isValid()) {
-        socket->writeDatagram("1", serverAddress, REMOTE_IP_PORT);
-    } else {
-        this->thread()->exit(-1);
-    }
+    connect(m_socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
+    QHostAddress remote(REMOTE_ADDR);
+    m_socket->writeDatagram("1", 1, remote, REMOTE_PORT);
 }
 
+void NetworkHandler::stop()
+{
+    disconnect(m_socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
+}
 
+void NetworkHandler::receive()
+{
+    char tmp[DGRAMM_SIZE];
+    int bytes = m_socket->readDatagram(tmp, DGRAMM_SIZE);
+    if (bytes == -1) {
+        stop();
+        emit badReceive();
+        return;
+    }
+
+    if (m_np.totalBytes == 0)
+        emit dataReceived();
+    m_np.totalBytes += bytes;
+
+    m_np.receiveIndexMutex.lock();
+    unsigned short idx = m_np.receiveIndex;
+    m_np.receiveIndex++;
+    m_np.receiveIndexMutex.unlock();
+
+    m_np.bufferMutex.lock();
+    strcpy(&m_np.buffer[idx * DGRAMM_SIZE], tmp);
+    m_np.bufferMutex.unlock();
+
+    m_np.overrideMutex.lock();
+    if (idx + 1 == 0) {
+        if (m_np.override) {
+            stop();
+            emit overrideBuffer();
+        }
+        m_np.override = true;
+    }
+    m_np.overrideMutex.unlock();
+}
