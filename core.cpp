@@ -8,6 +8,14 @@ Core::Core(QObject *parent) : QObject(parent)
 
     reset();
     createNetworkHandler();
+
+    m_updateTimer.setInterval(1000);
+
+    connect(&m_updateTimer, &QTimer::timeout, this, &Core::changeTime);
+    connect(&m_timer, &QTimer::timeout, this, &Core::stopReceiving);
+
+    connect(m_window, &Window::started, this, &Core::startReceive);
+    connect(m_window, &Window::stoped, this, &Core::stopReceivingByInterrupt);
 }
 
 Core::~Core()
@@ -26,34 +34,22 @@ Core::~Core()
 void Core::operator()()
 {
     m_window->show();
-    init();
 }
 
 void Core::init()
 {
     emit initNetwork();
-    QThread::usleep(100);
+    m_window->setIndicatorState(Indicators::Network, IndicatorState::Processing);
+    QThread::usleep(10);
     m_networkInitMutex.lock();
     if (m_networkInitialized) {
-        qDebug() << "Seems good" << endl;
-
-
-        ///
+        m_window->setIndicatorState(Indicators::Network, IndicatorState::Ok);
         m_initialized = true;
-        startReceive();
-        ///
-        QThread::sleep(2);
-        stopReceiving();
     } else {
-        qDebug() << "Not good" << endl;
+        m_window->setIndicatorState(Indicators::Network, IndicatorState::Error);
     }
     m_networkInitMutex.unlock();
     qDebug() << "Core" << endl;
-
-
-
-    ///
-
 }
 
 void Core::createDataHandler() {
@@ -118,22 +114,26 @@ void Core::changeTime()
 {
     if (m_timeInSec >= 0) {
         m_timeInSec--;
-        //set time
+        m_window->setTime(m_timeInSec);
     }
 }
 
 void Core::startReceive()
 {
-    //get time
-    if (!m_initialized && !m_timeInSec) return;
+    m_timeInSec = m_window->getTime();
+    if (m_timeInSec == 0) return;
+    init();
+    if (!m_initialized) return;
 
     reset();
     m_dataWritten = false;
     emit receivingStarted();
 
-    //set timers
-    //set Working state
-    //
+    m_timer.start(m_timeInSec * 1000);
+    m_updateTimer.start();
+
+    m_window->setState(WindowState::WokringState);
+    m_window->setIndicatorState(Indicators::Receiving, IndicatorState::Processing);
 }
 
 void Core::stopReceiving()
@@ -142,18 +142,15 @@ void Core::stopReceiving()
         m_receivingTerminated = true;
         emit receivingStoped();
 
-        //set stoping state
-        //timer off
-        //set time
+        m_window->setState(WindowState::StoppingState);
+        m_updateTimer.stop();
+        m_timeInSec = 0;
+        m_window->setTime(m_timeInSec);
     }
 }
 
-void Core::stopReceiveByTimer()
+void Core::stopReceivingByInterrupt()
 {
-
-}
-
-void Core::stopReceiveByInterrupt()
-{
-
+    m_timer.stop();
+    stopReceiving();
 }
