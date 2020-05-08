@@ -5,6 +5,7 @@
 #define DGRAMM_SIZE 1440
 
 #include <QMutex>
+#include <QString>
 
 struct NetworkParams {
     QMutex & initMutex;
@@ -21,6 +22,26 @@ struct NetworkParams {
     bool & init;                        //Is init?
     bool & term;                        //Stop receiving flag
     bool & override;                    //Override circle buffer
+};
+
+struct DataHandlerParams {
+    QString filename;
+
+    QMutex & initMutex;
+    QMutex & bufferMutex;
+    QMutex & overrideMutex;
+    QMutex & receiveIndexMutex;
+    QMutex & writtenIndexMutex;
+    QMutex & receiveTerminatedMutex;
+
+    char * buffer;
+    unsigned short & receiveIndex;
+    unsigned short & writtenIndex;
+
+    bool & init;
+    bool & written;
+    bool & overrided;
+    bool & receiveTerminated;
 };
 
 
