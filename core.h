@@ -21,6 +21,12 @@ public:
     ~Core();
 
     void operator()();
+
+public slots:
+    void startReceive();                            //Start receive data
+    void stopReceiving();                           //Stop receiving data
+    void stopReceivingByInterrupt();                //Receiving stoped by interrupt
+
 signals:
     void initNetwork();
     void receivingStarted();
@@ -67,10 +73,6 @@ private:
     void createNetworkHandler();                    //Create and initialize slots and signals of Network Handler
     void reset();                                   //Set default state
     void changeTime();                              //Change time (caused by timer)
-    void startReceive();                            //Start receive data
-    void stopReceiving();
-    void stopReceiveByTimer();                      //Receiving stoped by timer
-    void stopReceiveByInterrupt();                  //Receiving stoped by interrupt
 
 };
 
