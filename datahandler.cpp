@@ -5,13 +5,19 @@ DataHandler::DataHandler(DataHandlerParams dataHandlerParams, QObject *parent) :
 
 }
 
+DataHandler::~DataHandler() {
+    if (m_file.isOpen())
+        m_file.close();
+}
+
 void DataHandler::prepareFile()
 {
-    m_file.setFileName(m_params.filename);
-    if (!m_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return;
+    if (!m_file.isOpen()) {
+        m_file.setFileName(m_params.filename);
+        if (!m_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            return;
+        }
     }
-
     m_params.initMutex.lock();
     m_params.init = true;
     m_params.initMutex.unlock();
@@ -19,14 +25,18 @@ void DataHandler::prepareFile()
 
 void DataHandler::write()
 {
-    QString dgramm;
+    QString str(DGRAMM_SIZE);
     QTextStream stream(&m_file);
     while (true) {
         getParams();
+        if (m_params.writtingTerminated)
+            break;
         if ((m_receiveIndex > m_writtenIndex && !m_overrided) || m_overrided) {
             m_params.bufferMutex.lock();
-            stream << m_params.buffer[m_writtenIndex];
+            str = &m_params.buffer[m_writtenIndex * DGRAMM_SIZE];
             m_params.bufferMutex.unlock();
+
+            stream << str;
 
             m_params.writtenIndexMutex.lock();
             m_params.writtenIndex++;

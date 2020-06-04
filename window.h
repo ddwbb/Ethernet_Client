@@ -42,6 +42,8 @@ public:
     void setTime(int);
 
     void validateTime();
+    void printResult(int, long long, long);
+    void printError(const QString);
 
 public slots:
     void setIndicatorState(Indicators, IndicatorState);
@@ -70,5 +72,7 @@ private:
     QRegExpValidator m_timeValidator;
 
     QFileDialog explorer;
+
+    QString timeToString(int);
 };
 #endif // WINDOW_H

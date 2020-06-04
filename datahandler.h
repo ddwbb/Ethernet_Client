@@ -13,6 +13,7 @@ class DataHandler : public QObject
     Q_OBJECT
 public:
     explicit DataHandler(DataHandlerParams, QObject *parent = nullptr);
+    ~DataHandler();
 
 public slots:
     void write();

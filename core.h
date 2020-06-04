@@ -12,6 +12,7 @@
 
 #include "window.h"
 #include "config.h"
+#include "datahandler.h"
 #include "networkhandler.h"
 
 class Core : public QObject
@@ -23,24 +24,35 @@ public:
     void operator()();
 
 public slots:
-    void startReceive();                            //Start receive data
-    void stopReceiving();                           //Stop receiving data
-    void stopReceivingByInterrupt();                //Receiving stoped by interrupt
+
 
 signals:
     void initNetwork();
+    void dataReceived();
+    void initDataHandler();
     void receivingStarted();
     void receivingStoped();
 
+private slots:
+    void startReceive();                            //Start receive data
+    void stopReceiving();                           //Stop receiving data
+    void startWriteData();
+    void stopReceivingByInterrupt();                //Receiving stoped by interrupt
+    void end();
+    void badReceiveHandle(const QString);
+    void overrideBufferHandle();
 
 private:
     Q_OBJECT
+
+    QString m_filename;
+
     QTimer m_timer;                                 //Receive Timer
-    QTimer m_updateTimer;
+    QTimer m_updateTimer;                           //Time update timer
 
     Window * m_window;                              //Gui
     NetworkHandler * m_network;                     //Network handler + receiver
-    //Handler
+    DataHandler * m_dataHandler;
 
     QThread m_networkThread;                        //Network Handler's thread
     QThread m_dataHandlerThread;                    //Data Handler's thread
@@ -48,10 +60,13 @@ private:
     QMutex m_bufferMutex;                           //Mutex of circle buffer
     QMutex m_overrideMutex;                         //Mutex of override buffer
     QMutex m_networkInitMutex;                      //Mutex of network init
+    QMutex m_dataHandlerInitMutex;                  //Mutex of dataHandlerInitialized
     QMutex m_receiveIndexMutex;                     //Mutex of received data index
     QMutex m_writtenIndexMutex;                     //Mutex of written data index
+    QMutex m_receivingTerminatedMutex;
 
-    int m_timeInSec;                                  //Time to receive in sec
+    int m_totalTime;
+    int m_timeInSec;                                //Time to receive in sec
 
     char * m_buffer;                                //Circle buffer
     //std::vector<char[1440]> * m_buffer;
@@ -65,7 +80,9 @@ private:
     bool m_overrided;                               //Is buffer overriding?
     bool m_initialized;                             //Is initialized and ready to process
     bool m_dataWritten;                             //Is all data was written?
+    bool m_dataHandlerInitialized;                  //Is data handler initialized (file opened successfully)?
     bool m_networkInitialized;                      //Is network initialized?
+    bool m_writtingTerminared;
     bool m_receivingTerminated;                     //Is receiving must be stop?
 
     void init();                                    //Initialize
