@@ -1,7 +1,5 @@
 #include "networkhandler.h"
 
-#include <QDebug>
-
 NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObject(parent), m_np(p)
 {
     m_socket = nullptr;
@@ -10,7 +8,6 @@ NetworkHandler::NetworkHandler(struct NetworkParams p, QObject *parent) : QObjec
 
 void NetworkHandler::init()
 {
-    qDebug() << "Start Network Init" << endl;
     m_np.initMutex.lock();
     if (!m_socket)
         m_socket = new QUdpSocket(this);
@@ -22,11 +19,15 @@ void NetworkHandler::init()
         m_np.init = true;
     }
     m_np.initMutex.unlock();
-    qDebug() << "End Network Init" << endl;
 }
 
 void NetworkHandler::start()
 {
+    if (m_socket->hasPendingDatagrams()) {
+        char tmp[DGRAMM_SIZE];
+        m_socket->readDatagram(tmp, DGRAMM_SIZE);
+        m_socket->readAll();
+    }
     connect(m_socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
     QHostAddress remote(REMOTE_ADDR);
     m_socket->writeDatagram("1", 1, remote, REMOTE_PORT);
@@ -34,6 +35,8 @@ void NetworkHandler::start()
 
 void NetworkHandler::stop()
 {
+    if (m_np.totalBytes == 0)
+        emit dataReceived();
     disconnect(m_socket, &QUdpSocket::readyRead, this, &NetworkHandler::receive);
 }
 
@@ -42,8 +45,7 @@ void NetworkHandler::receive()
     char tmp[DGRAMM_SIZE];
     int bytes = m_socket->readDatagram(tmp, DGRAMM_SIZE);
     if (bytes == -1) {
-        stop();
-        emit badReceive();
+        emit badReceive(m_socket->errorString());
         return;
     }
 
@@ -61,9 +63,8 @@ void NetworkHandler::receive()
     m_np.bufferMutex.unlock();
 
     m_np.overrideMutex.lock();
-    if (idx + 1 == 0) {
+    if (idx++ == 0) {
         if (m_np.override) {
-            stop();
             emit overrideBuffer();
         }
         m_np.override = true;

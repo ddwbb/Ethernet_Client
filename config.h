@@ -13,19 +13,19 @@ struct NetworkParams {
     QMutex & overrideMutex;
     QMutex & receiveIndexMutex;
 
-    long long & totalBytes;             //Total bytes amount
+    long long & totalBytes;
 
-    char * buffer;                      //buffer
+    char * buffer;
 
-    unsigned short & receiveIndex;      //Index in buffer
+    unsigned short & receiveIndex;
 
-    bool & init;                        //Is init?
-    bool & term;                        //Stop receiving flag
-    bool & override;                    //Override circle buffer
+    bool & init;
+    bool & term;
+    bool & override;
 };
 
 struct DataHandlerParams {
-    QString filename;
+    QString & filename;
 
     QMutex & initMutex;
     QMutex & bufferMutex;
@@ -39,9 +39,9 @@ struct DataHandlerParams {
     unsigned short & writtenIndex;
 
     bool & init;
-    bool & written;
     bool & overrided;
     bool & receiveTerminated;
+    bool & writtingTerminated;
 };
 
 
