@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QNetworkDatagram>
 
 #include "config.h"
 
@@ -26,7 +27,7 @@ public slots:
 
 signals:
     void connectionStatus(int);             //connection init status
-    void badReceive();                      //error while receiving
+    void badReceive(QString);                      //error while receiving
     void overrideBuffer();                  //override buffer (receive speed > handle speed)
     void dataReceived();                    //data received and should be handle
 private:

@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     core.cpp \
+    datahandler.cpp \
     indicator.cpp \
     main.cpp \
     networkhandler.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 HEADERS += \
     config.h \
     core.h \
+    datahandler.h \
     indicator.h \
     networkhandler.h \
     window.h

@@ -1,21 +1,18 @@
 #include "window.h"
 #include "ui_window.h"
 
-#include <QDebug>
-
 Window::Window(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Window)
 {
     ui->setupUi(this);
 
-    ui->networkInitState->setState(IndicatorState::Processing);
-
     m_timeRegExp.setPattern("^[0-9]{2}:[0-5][0-9]:[0-5][0-9]$");
     m_timeValidator.setRegExp(m_timeRegExp);
     ui->timeEdit->setValidator(&m_timeValidator);
 
-    ui->selectFileEdit->setText(QDir::currentPath() + "/output.txt");
+    ui->selectFileEdit->setText(QDir::currentPath() + "/../output.txt");
+    m_timeStr = ui->timeEdit->text();
 
     connect(&explorer, &QFileDialog::fileSelected, this, &Window::selectFile);
 }
@@ -80,20 +77,7 @@ QString Window::getFileName()
 
 void Window::setTime(int time)
 {
-    if (time < 0) time = 0;
-    int hours = time / 3600;
-    time %= 3600;
-    int minutes = time / 60;
-    time %= 60;
-    int seconds = time;
-
-    QString tmp = (hours > 9) ? QString::number(hours) : "0" + QString::number(hours);
-    m_timeStr = tmp + ":";
-    tmp = (minutes > 9) ? QString::number(minutes) : "0" + QString::number(minutes);
-    m_timeStr += tmp + ":";
-    tmp = (seconds > 9) ? QString::number(seconds) : "0" + QString::number(seconds);
-    m_timeStr += tmp;
-
+    m_timeStr = timeToString(time);
     ui->timeEdit->setText(m_timeStr);
 }
 
@@ -111,6 +95,24 @@ void Window::validateTime()
     }
 }
 
+void Window::printResult(int time, long long bytes, long dgramms)
+{
+    QString result = "Время работы: "
+            + timeToString(time)
+            + "\nПолучено датаграмм: "
+            + QString::number(dgramms)
+            + "\nВсего байт: "
+            + QString::number(bytes);
+    ui->textEdit->append(result);
+    ui->textEdit->append("Завершение работы\n\n");
+}
+
+void Window::printError(const QString error)
+{
+    QString result = "Во время работы произошла фатальная ошибка:\n" + error;
+    ui->textEdit->append(result);
+}
+
 void Window::selectFile(const QString name)
 {
     ui->selectFileEdit->setText(name);
@@ -119,6 +121,7 @@ void Window::selectFile(const QString name)
 
 void Window::on_startButton_clicked()
 {
+    ui->textEdit->append("Начало работы");
     emit started();
 }
 
@@ -140,5 +143,25 @@ void Window::on_timeEdit_textChanged(const QString &arg1)
     m_timeStr = arg1;
     if (oldLength < newLength && (newLength == 2 || newLength == 5))
             m_timeStr += ":";
-        ui->timeEdit->setText(m_timeStr);
+    ui->timeEdit->setText(m_timeStr);
+}
+
+QString Window::timeToString(int time)
+{
+    QString timeStr;
+    if (time < 0) time = 0;
+    int hours = time / 3600;
+    time %= 3600;
+    int minutes = time / 60;
+    time %= 60;
+    int seconds = time;
+
+    QString tmp = (hours > 9) ? QString::number(hours) : "0" + QString::number(hours);
+    timeStr = tmp + ":";
+    tmp = (minutes > 9) ? QString::number(minutes) : "0" + QString::number(minutes);
+    timeStr += tmp + ":";
+    tmp = (seconds > 9) ? QString::number(seconds) : "0" + QString::number(seconds);
+    timeStr += tmp;
+
+    return timeStr;
 }

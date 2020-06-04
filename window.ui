@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>876</width>
-    <height>586</height>
+    <width>444</width>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Window</string>
+   <string>Ethernet Debugger</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -99,7 +99,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="timeEdit"/>
+           <widget class="QLineEdit" name="timeEdit">
+            <property name="inputMask">
+             <string/>
+            </property>
+            <property name="text">
+             <string>00:10:00</string>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_7">
